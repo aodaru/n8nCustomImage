@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+
+# Local and generated video data
+videos/
+work/
+qa/
+
+# Dependencies and build output
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc

@@ -1,0 +1,30 @@
+[
+ {
+  "text": "reemplaza",
+  "startMs": 0,
+  "endMs": 400,
+  "timestampMs": 200,
+  "confidence": 1
+ },
+ {
+  "text": "esto",
+  "startMs": 400,
+  "endMs": 700,
+  "timestampMs": 550,
+  "confidence": 1
+ },
+ {
+  "text": "corriendo",
+  "startMs": 700,
+  "endMs": 1200,
+  "timestampMs": 950,
+  "confidence": 1
+ },
+ {
+  "text": "build-captions.py",
+  "startMs": 1200,
+  "endMs": 2000,
+  "timestampMs": 1600,
+  "confidence": 1
+ }
+]
