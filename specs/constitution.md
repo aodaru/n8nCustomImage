@@ -1,52 +1,63 @@
 # Constitucion del proyecto
 
-Version: 1.0.0
+Version: 1.1.0
 
-Esta constitucion define los limites y reglas que deben cumplir las specs,
-implementaciones y despliegues de este repositorio.
+Esta constitucion gobierna las specs, implementaciones y despliegues del
+proyecto. Su finalidad es proporcionar herramientas independientes que n8n pueda
+orquestar para editar videos.
 
-## Articulo I: Alcance de despliegue
+## Articulo I: Mision y alcance
 
-- Este repositorio administra unicamente las herramientas de procesamiento de
-  video propias del proyecto.
-- Los servicios propios son `remotion` y `whisper-api`.
-- n8n ya existe y permanece fuera de este repositorio y de este Compose.
-- PostgreSQL y Redis/Valkey pertenecen al despliegue existente de n8n y no se
-  crean, modifican ni administran aqui.
+- El sistema debe ayudar a n8n a convertir grabaciones en Reels verticales
+  listos para revision editorial.
+- El alcance es un pipeline editorial completo: preparacion, transcripcion,
+  captions, composicion, privacidad, audio, medicion y exportacion.
+- El usuario principal es un editor individual que trabaja en espanol y revisa
+  manualmente los resultados.
+- La revision humana es obligatoria antes del render final o la publicacion.
 
-## Articulo II: Despliegue en TrueNAS
+## Articulo II: Responsabilidades de los servicios
 
-- Los contenedores se despliegan manualmente desde la GUI de TrueNAS.
-- El Compose versionado sirve como referencia reproducible para ese despliegue.
-- Los servicios propios deben conectarse a la red externa
+- n8n orquesta el workflow y conserva su responsabilidad de integracion.
+- `whisper-api` proporciona transcripcion local con timestamps por palabra.
+- `remotion` proporciona composicion visual, captions, overlays y render.
+- `ffmpeg-api` es una etapa futura de extraccion de procesamiento; no es un
+  prerrequisito para integrar primero Whisper y Remotion.
+- n8n, PostgreSQL y Redis/Valkey ya existen y quedan fuera de este repositorio.
+  Este proyecto no los crea, modifica ni administra.
+
+## Articulo III: Despliegue
+
+- Los servicios propios se despliegan manualmente desde la GUI de TrueNAS.
+- El Compose versionado describe unicamente `remotion` y `whisper-api`.
+- Ambos servicios deben conectarse a la red externa
   `ix-internal-n8n-n8n-net`.
-- No se publican puertos al host salvo que una prueba concreta lo justifique.
+- No se publican APIs internas al host salvo una necesidad de prueba explícita.
+- Los servicios comparten `/workspace/videos` para intercambiar archivos.
 
-## Articulo III: Integracion
+## Articulo IV: Integracion y seguridad
 
-- n8n orquesta; Remotion y Whisper procesan.
-- La comunicacion entre servicios se realiza mediante HTTP interno.
-- Los archivos se comparten mediante `/workspace/videos`.
-- Las APIs deben exponer contratos explicitos, healthchecks y errores
-  verificables.
-
-## Articulo IV: Seguridad y recursos
-
-- No se almacenan credenciales reales en Git ni en archivos de ejemplo.
-- Las variables sensibles se mantienen en `.env`, excluido del repositorio.
+- Las herramientas se comunican mediante contratos HTTP explícitos.
+- Las operaciones largas exponen healthcheck, estados, errores y polling cuando
+  corresponda.
+- Las rutas de archivos se limitan al volumen compartido.
+- Las credenciales reales permanecen en `.env`, excluido de Git.
 - No se aceptan comandos FFmpeg arbitrarios desde n8n.
 - El procesamiento inicial es CPU-only: sin CUDA, NVENC ni `runtime: nvidia`.
 
-## Articulo V: Calidad operativa
+## Articulo V: Calidad editorial y operativa
 
-- Los jobs y archivos deben poder recuperarse tras reiniciar un contenedor.
-- Las operaciones largas deben ofrecer polling, estados y errores claros.
-- Toda etapa del pipeline debe poder validarse de forma independiente antes de
-  integrarse en el workflow de n8n.
-- La revision humana conserva el control editorial antes de la salida final.
+- Cada etapa debe poder validarse de forma independiente antes de integrarse.
+- Los captions deben conservar sincronizacion por palabra.
+- Las tarjetas y overlays deben aportar contraste, consecuencia o contexto, no
+  repetir mecánicamente lo que se está oyendo.
+- El pipeline debe producir un resultado recuperable después de reiniciar un
+  contenedor.
+- La aceptación requiere probar un Reel real y revisar captions, privacidad,
+  audio, formato vertical y salida final.
 
-## Articulo VI: Cambios a la constitucion
+## Articulo VI: Cambios
 
-Cualquier cambio de alcance, servicio administrado, red o estrategia de
-despliegue debe actualizar primero esta constitucion y despues las specs
+Cualquier cambio de misión, audiencia, servicio administrado, red o estrategia
+de despliegue debe actualizar primero esta constitucion y después las specs
 dependientes.

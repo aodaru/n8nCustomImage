@@ -1,53 +1,51 @@
 # Tech Stack
 
-## Plataforma
+## Plataforma y despliegue
 
 - TrueNAS 25.04.2.6.
-- Docker Compose administrado desde la GUI web de TrueNAS.
+- Contenedores desplegados manualmente desde la GUI web de TrueNAS.
 - Red externa: `ix-internal-n8n-n8n-net`.
 - Procesamiento exclusivamente por CPU.
-- Volumen compartido del pipeline:
-  `/mnt/Aodnas/Docker/videos:/workspace/videos`.
+- Volumen compartido: `/mnt/Aodnas/Docker/videos:/workspace/videos`.
 
-## Orquestacion
+## Orquestacion existente
 
-- n8n 2.35.0 como orquestador.
+- n8n 2.35.0 como orquestador existente.
+- n8n, PostgreSQL y Redis/Valkey no son administrados por este repositorio.
 - Los workflows llaman a las herramientas mediante HTTP interno.
-- La imagen actual de n8n se conserva sin cambios durante la migracion.
-- El workflow nuevo se reconstruira desde cero para evitar depender de la
-  instalacion recuperada.
+- La imagen y los datos de n8n permanecen sin cambios.
 
-## Herramientas
+## Servicios propios
 
-- `ffmpeg-api`: FastAPI/Uvicorn, FFmpeg y FFprobe, con jobs CPU.
-- `whisper-api`: FastAPI con `faster-whisper`, modelo `medium`, CPU.
-- `remotion`: Node.js, Chromium y Remotion para composicion visual.
-- PostgreSQL y Valkey/Redis pertenecen al despliegue existente de n8n y no son
-  administrados por este proyecto.
+- `whisper-api`: FastAPI, `faster-whisper`, modelo `medium`, CPU, timestamps
+  por palabra.
+- `remotion`: Node.js, Chromium, Express y Remotion para captions, overlays y
+  composición visual.
+- `ffmpeg-api`: servicio futuro para extraer progresivamente FFmpeg de n8n;
+  se implementará después de validar Whisper y Remotion.
 
 ## Contratos y almacenamiento
 
 - Las herramientas reciben peticiones JSON por HTTP.
-- Los archivos no se envian entre servicios como payload; se intercambian por
-  rutas dentro de `/workspace/videos`.
-- Los trabajos se identifican con `job_id` y se consultan mediante polling.
-- Las rutas de entrada y salida deben estar confinadas al volumen de videos.
-- FFmpeg se ejecuta con argumentos estructurados, nunca con shell concatenado.
+- Los archivos no se envían entre servicios como payload; se intercambian por
+  rutas bajo `/workspace/videos`.
+- Las operaciones largas deben identificarse con `job_id` y consultarse por
+  polling cuando su duración lo requiera.
+- Las rutas de entrada y salida deben permanecer confinadas al volumen.
+- Ningún servicio debe aceptar comandos FFmpeg arbitrarios.
 
-## Brechas tecnicas prioritarias
+## Brechas prioritarias
 
-- No existe aun el contenedor `ffmpeg-api` ni su Dockerfile.
-- No existe un contrato comun de jobs entre FFmpeg, Whisper y Remotion.
-- El flujo anterior ejecuta FFmpeg directamente dentro de n8n.
-- No hay una implementacion persistente y aislada de cola, progreso,
-  cancelacion y limpieza de jobs FFmpeg.
-- Los contenedores de herramientas se despliegan manualmente desde la GUI de
-  TrueNAS y este compose queda versionado como referencia.
+- Crear y activar el workflow n8n que llame a Whisper y Remotion.
+- Definir contratos de transcripción, captions, render y errores.
+- Persistir transcript, captions, estados y rutas de cada trabajo.
+- Implementar pausas de revisión humana y QA.
+- Validar el pipeline completo con un Reel real en CPU.
+- Extraer posteriormente las operaciones FFmpeg a `ffmpeg-api`.
 
 ## Restricciones
 
 - No incluir `runtime: nvidia`, CUDA, NVENC ni dependencias GPU.
-- No publicar las APIs internas al host salvo que una prueba concreta lo
-  requiera.
-- No permitir comandos FFmpeg arbitrarios desde n8n.
-- No acoplar el procesamiento de video a la imagen de n8n.
+- No publicar las APIs internas al host salvo una prueba concreta.
+- No acoplar Whisper o Remotion a una imagen modificada de n8n.
+- Mantener secretos en `.env`, excluido del repositorio.

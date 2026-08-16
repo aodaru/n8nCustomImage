@@ -1,6 +1,17 @@
-# n8n + ffmpeg en TrueNAS 25.04.2.6
+# Herramientas de edición de video para n8n en TrueNAS
 
-Pipeline completo de edición de video: n8n como orquestador, ffmpeg para transcodificación, y Remotion en contenedor dedicado para subtítulos karaoke y tarjetas.
+Herramientas independientes para que el n8n existente orqueste un pipeline
+editorial de edición de video. Este repositorio despliega únicamente Remotion y
+Whisper API; n8n, PostgreSQL y Redis/Valkey ya existen fuera del proyecto.
+
+## Alcance vigente
+
+- Usuario objetivo: editor individual que trabaja principalmente en español.
+- Flujo: transcripción, captions, composición visual, revisión humana y QA.
+- Despliegue: manual desde la GUI de TrueNAS.
+- Integración: red externa `ix-internal-n8n-n8n-net` y volumen compartido.
+- Prioridad actual: integrar Whisper y Remotion antes de extraer FFmpeg a un
+  servicio independiente.
 
 ## Contexto
 

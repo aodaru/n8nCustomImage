@@ -1,28 +1,26 @@
 # TODO - Herramientas de video para n8n
 
-Backlog de implementacion para servicios independientes que n8n pueda
-orquestar en la creacion editorial de Reels.
+Backlog de implementación para servicios independientes que n8n pueda
+orquestar en la edición editorial de Reels.
 
 ## Fases
 
-- [ ] Fase 1: Definir contratos comunes de herramientas HTTP.
-- [ ] Fase 2: Crear la imagen CPU de `ffmpeg-api`.
-- [ ] Fase 3: Implementar healthcheck y `probe` con FFprobe.
-- [ ] Fase 4: Implementar cola local y ciclo de vida de jobs.
-- [ ] Fase 5: Implementar progreso, cancelacion y errores.
-- [ ] Fase 6: Implementar `prepare_video` y `extract_audio`.
-- [ ] Fase 7: Implementar `mix_audio` y `export_reel`.
-- [ ] Fase 8: Conectar `ffmpeg-api` a la red de TrueNAS.
-- [ ] Fase 9: Crear el compose completo para la GUI de TrueNAS.
-- [ ] Fase 10: Crear el workflow n8n desde cero.
-- [ ] Fase 11: Integrar Whisper y persistencia de transcript/captions.
-- [ ] Fase 12: Integrar Remotion y polling de renders.
-- [ ] Fase 13: Ejecutar pruebas con un Reel real en CPU.
-- [ ] Fase 14: Documentar despliegue, operacion y recuperacion.
+- [ ] Fase 1: Definir contratos HTTP y validar red/volúmenes.
+- [ ] Fase 2: Desplegar y verificar `whisper-api` en TrueNAS.
+- [ ] Fase 3: Desplegar y verificar `remotion` en TrueNAS.
+- [ ] Fase 4: Crear workflow n8n mínimo con Whisper y Remotion.
+- [ ] Fase 5: Persistir transcript, captions, jobs y resultados.
+- [ ] Fase 6: Añadir pausas de revisión editorial y QA.
+- [ ] Fase 7: Probar un Reel real completo en CPU.
+- [ ] Fase 8: Definir e implementar `ffmpeg-api` posteriormente.
+- [ ] Fase 9: Migrar operaciones FFmpeg desde n8n de forma incremental.
+- [ ] Fase 10: Documentar despliegue, operación y recuperación desde TrueNAS.
 
 ## Fuera del alcance inicial
 
-- Aceleracion GPU, CUDA o NVENC.
+- Crear o modificar el contenedor n8n existente.
+- Crear o modificar PostgreSQL o Redis/Valkey de n8n.
+- Aceleración GPU, CUDA o NVENC.
 - Servicio multiusuario.
-- Publicacion automatica en Instagram, TikTok o YouTube.
-- Edicion generativa o decisiones editoriales totalmente autonomas.
+- Publicación automática en Instagram, TikTok o YouTube.
+- Edición generativa o decisiones editoriales totalmente autónomas.

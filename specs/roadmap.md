@@ -1,68 +1,53 @@
 # Roadmap
 
-Orden de implementacion derivado de `TODO.md`. Cada fase debe ser pequena,
+Orden de implementación basado en `TODO.md`. Cada fase debe ser pequeña,
 verificable y completarse antes de iniciar la siguiente.
 
-## Fase 1: Contrato base
+## Fase 1: Contratos y entorno
 
-- [ ] Definir formato comun de request, response y estados.
-- [ ] Definir politica de rutas bajo `/workspace/videos`.
-- [ ] Definir formato de errores y healthchecks.
+- [ ] Definir request y response de `whisper-api`.
+- [ ] Definir request y response de `remotion`.
+- [ ] Confirmar red externa y volumen compartido en TrueNAS.
+- [ ] Documentar healthchecks y formato común de errores.
 
-## Fase 2: Imagen FFmpeg
+## Fase 2: Validar Whisper
 
-- [ ] Crear `ffmpeg-api/Dockerfile` CPU-only.
-- [ ] Instalar FFmpeg, FFprobe, FastAPI y Uvicorn.
-- [ ] Ejecutar el proceso con usuario no root.
+- [ ] Desplegar `whisper-api` manualmente desde la GUI de TrueNAS.
+- [ ] Verificar `/health` desde el contenedor n8n existente.
+- [ ] Ejecutar una transcripción de prueba con timestamps por palabra.
+- [ ] Definir el formato persistido de `transcript.json`.
 
-## Fase 3: Probe
+## Fase 3: Validar Remotion
 
-- [ ] Implementar `GET /health`.
-- [ ] Implementar `probe` con FFprobe.
-- [ ] Validar formatos, streams, duracion y rutas.
+- [ ] Desplegar `remotion` manualmente desde la GUI de TrueNAS.
+- [ ] Verificar `/health` desde el contenedor n8n existente.
+- [ ] Crear un render mínimo con captions de prueba.
+- [ ] Verificar escritura de resultados en `/workspace/videos`.
 
-## Fase 4: Jobs
+## Fase 4: Workflow n8n mínimo
 
-- [ ] Crear IDs y directorios aislados por job.
-- [ ] Implementar cola local con concurrencia inicial de uno.
-- [ ] Persistir request y status en el volumen.
+- [ ] Crear webhook de entrada y estado inicial del trabajo.
+- [ ] Llamar a Whisper y persistir transcript/captions.
+- [ ] Llamar a Remotion y guardar el `job_id` de render.
+- [ ] Implementar polling, timeout y errores de render.
 
-## Fase 5: Control de ejecucion
+## Fase 5: Revisión editorial
 
-- [ ] Ejecutar FFmpeg sin shell concatenado.
-- [ ] Leer progreso con `-progress`.
-- [ ] Implementar polling, cancelacion y errores.
-- [ ] Escribir salidas parciales y publicar resultados atomicos.
+- [ ] Añadir pausa de revisión de captions, planos y privacidad.
+- [ ] Aplicar correcciones, tokens y máscaras aprobadas por el editor.
+- [ ] Añadir render de frames QA.
+- [ ] Añadir pausa de aprobación QA antes de continuar.
 
-## Fase 6: Preparacion
+## Fase 6: Pipeline real
 
-- [ ] Implementar `prepare_video` a 30 fps y H.264.
-- [ ] Implementar `extract_audio` mono a 16 kHz.
-- [ ] Mantener las rutas actuales de trabajo del pipeline.
-
-## Fase 7: Audio y exportacion
-
-- [ ] Implementar `mix_audio` con voz, musica y efectos.
-- [ ] Implementar `export_reel` con H.264/AAC, BT.709 y `+faststart`.
-- [ ] Verificar objetivo aproximado de -14 LUFS.
-
-## Fase 8: Despliegue TrueNAS
-
-- [ ] Conectar el servicio a `ix-internal-n8n-n8n-net`.
-- [ ] Crear copia completa `docker-compose.truenas.yaml`.
-- [ ] Documentar pegado, actualizacion y logs desde la GUI.
-
-## Fase 9: Workflow n8n
-
-- [ ] Crear workflow nuevo desde el webhook inicial.
-- [ ] Reemplazar comandos FFmpeg locales por HTTP a las herramientas.
-- [ ] Integrar Whisper y guardar transcript/captions.
-- [ ] Integrar Remotion y su polling.
-- [ ] Mantener pausa de revision humana y pausa de QA.
-
-## Fase 10: Validacion
-
-- [ ] Ejecutar el pipeline completo con un video real.
+- [ ] Integrar preparación, medición, audio y exportacion existentes.
+- [ ] Ejecutar un Reel real en CPU.
 - [ ] Verificar captions, privacidad, audio y formato vertical.
-- [ ] Verificar recuperacion despues de reiniciar un contenedor.
-- [ ] Documentar operacion y criterios de aceptacion.
+- [ ] Documentar recuperación tras reiniciar un contenedor.
+
+## Fase 7: FFmpeg como servicio posterior
+
+- [ ] Definir contrato de `ffmpeg-api`.
+- [ ] Crear imagen CPU con FFmpeg y FFprobe.
+- [ ] Implementar jobs, progreso, cancelación y rutas seguras.
+- [ ] Migrar operaciones FFmpeg desde n8n una por una.
