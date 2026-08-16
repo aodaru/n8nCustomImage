@@ -21,8 +21,8 @@ orquestar para editar videos.
 - n8n orquesta el workflow y conserva su responsabilidad de integracion.
 - `whisper-api` proporciona transcripcion local con timestamps por palabra.
 - `remotion` proporciona composicion visual, captions, overlays y render.
-- `ffmpeg-api` será responsabilidad del repositorio externo del contenedor de
-  scripts; no se implementará ni desplegará aquí.
+- FFmpeg y los scripts auxiliares serán responsabilidad del repositorio externo
+  del contenedor de scripts; n8n los ejecutará mediante SSH.
 - n8n, PostgreSQL y Redis/Valkey ya existen y quedan fuera de este repositorio.
   Este proyecto no los crea, modifica ni administra.
 
@@ -30,6 +30,8 @@ orquestar para editar videos.
 
 - Los servicios propios se despliegan manualmente desde la GUI de TrueNAS.
 - El Compose versionado describe unicamente `remotion` y `whisper-api`.
+- El contenedor externo de scripts se despliega por separado y comparte el
+  volumen de videos con n8n.
 - Ambos servicios deben conectarse a la red externa
   `ix-internal-n8n-n8n-net`.
 - No se publican APIs internas al host salvo una necesidad de prueba explícita.
@@ -37,12 +39,14 @@ orquestar para editar videos.
 
 ## Articulo IV: Integracion y seguridad
 
-- Las herramientas se comunican mediante contratos HTTP explícitos.
+- Whisper y Remotion se comunican mediante HTTP interno.
+- FFmpeg y los scripts se invocan mediante SSH desde n8n.
 - Las operaciones largas exponen healthcheck, estados, errores y polling cuando
   corresponda.
 - Las rutas de archivos se limitan al volumen compartido.
 - Las credenciales reales permanecen en `.env`, excluido de Git.
-- No se aceptan comandos FFmpeg arbitrarios desde n8n.
+- El acceso SSH debe usar una cuenta restringida y comandos/scripts controlados.
+- No se aceptan comandos FFmpeg arbitrarios sin validación en el contenedor.
 - El procesamiento inicial es CPU-only: sin CUDA, NVENC ni `runtime: nvidia`.
 
 ## Articulo V: Calidad editorial y operativa

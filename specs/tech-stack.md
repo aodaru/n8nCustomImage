@@ -21,16 +21,16 @@
   por palabra.
 - `remotion`: Node.js, Chromium, Express y Remotion para captions, overlays y
   composición visual.
-- `ffmpeg-api`: servicio externo, implementado y desplegado desde el repositorio
-  del contenedor de scripts. Este repositorio solo consumirá su contrato HTTP.
+- `scripts`: contenedor externo con FFmpeg y scripts auxiliares, implementado y
+  desplegado desde otro repositorio. n8n lo invoca mediante SSH.
 
 ## Contratos y almacenamiento
 
-- Las herramientas reciben peticiones JSON por HTTP.
-- Los archivos no se envían entre servicios como payload; se intercambian por
-  rutas bajo `/workspace/videos`.
-- Las operaciones largas deben identificarse con `job_id` y consultarse por
-  polling cuando su duración lo requiera.
+- Whisper y Remotion reciben peticiones JSON por HTTP interno.
+- FFmpeg y los scripts reciben argumentos controlados mediante SSH.
+- Los archivos no se envían entre servicios como payload; n8n y el contenedor de
+  scripts comparten rutas bajo `/workspace/videos`.
+- Las operaciones largas deben registrar estado y errores en archivos del job.
 - Las rutas de entrada y salida deben permanecer confinadas al volumen.
 - Ningún servicio debe aceptar comandos FFmpeg arbitrarios.
 
@@ -41,8 +41,8 @@
 - Persistir transcript, captions, estados y rutas de cada trabajo.
 - Implementar pausas de revisión humana y QA.
 - Validar el pipeline completo con un Reel real en CPU.
-- Integrar el `ffmpeg-api` del repositorio externo después de validar Whisper y
-  Remotion.
+- Integrar el contenedor externo de scripts mediante SSH después de validar
+  Whisper y Remotion.
 
 ## Restricciones
 
@@ -50,3 +50,4 @@
 - No publicar las APIs internas al host salvo una prueba concreta.
 - No acoplar Whisper o Remotion a una imagen modificada de n8n.
 - Mantener secretos en `.env`, excluido del repositorio.
+- Usar claves SSH, no contraseñas, para la ejecución desde n8n.

@@ -12,8 +12,8 @@ orquestar en la edición editorial de Reels.
 - [ ] Fase 5: Persistir transcript, captions, jobs y resultados.
 - [ ] Fase 6: Añadir pausas de revisión editorial y QA.
 - [ ] Fase 7: Probar un Reel real completo en CPU.
-- [ ] Fase 8: Implementar `ffmpeg-api` en el repositorio externo de scripts.
-- [ ] Fase 9: Integrar y probar `ffmpeg-api` desde n8n.
+- [ ] Fase 8: Implementar el contenedor externo de scripts con FFmpeg.
+- [ ] Fase 9: Integrar ejecución SSH y volumen compartido con n8n.
 - [ ] Fase 10: Documentar despliegue, operación y recuperación desde TrueNAS.
 
 ## Fuera del alcance inicial

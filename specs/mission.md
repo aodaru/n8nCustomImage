@@ -42,5 +42,4 @@ revisables antes de renderizar y publicar.
 - Publicacion automatica en redes sociales.
 - Edicion generativa o decisiones editoriales totalmente autonomas.
 - CUDA, NVENC o aceleracion GPU.
-- La implementacion de `ffmpeg-api`, que pertenece al repositorio externo de
-  herramientas de scripts.
+- La implementacion del contenedor externo de scripts y su ejecucion SSH.

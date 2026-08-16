@@ -10,8 +10,8 @@ Whisper API; n8n, PostgreSQL y Redis/Valkey ya existen fuera del proyecto.
 - Flujo: transcripción, captions, composición visual, revisión humana y QA.
 - Despliegue: manual desde la GUI de TrueNAS.
 - Integración: red externa `ix-internal-n8n-n8n-net` y volumen compartido.
-- Prioridad actual: integrar Whisper y Remotion. `ffmpeg-api` se implementará en
-  el repositorio externo del contenedor de scripts y luego se consumirá por HTTP.
+- Prioridad actual: integrar Whisper y Remotion. FFmpeg se ejecutará por SSH en
+  un contenedor externo de scripts que comparte el volumen de videos con n8n.
 
 ## Contexto
 
@@ -1097,11 +1097,11 @@ Si se cambia a una GPU compatible (GTX 1060 o superior, Pascal o posterior):
 
 ---
 
-## Arquitectura objetivo: FFmpeg como servicio independiente
+## Arquitectura externa: FFmpeg por SSH
 
-Esta es la siguiente implementación del pipeline. El n8n actual se conserva sin
-cambios para no romper la instalación que está funcionando. FFmpeg se moverá
-progresivamente a un contenedor dedicado, igual que Whisper y Remotion.
+FFmpeg y los scripts auxiliares vivirán en otro repositorio, dentro de un
+contenedor de scripts. n8n ejecutará esos scripts mediante SSH. No se creará un
+servicio HTTP `ffmpeg-api` en este repositorio.
 
 ### Restricciones de despliegue
 
@@ -1111,21 +1111,22 @@ progresivamente a un contenedor dedicado, igual que Whisper y Remotion.
   `ix-internal-n8n-n8n-net`.
 - El procesamiento será exclusivamente por CPU. No se usará NVIDIA, CUDA,
   NVENC ni `runtime: nvidia`.
-- La imagen y el servicio actuales de n8n no se modificarán en la primera fase.
+- La imagen y el servicio actuales de n8n no se modificarán.
+- El contenedor de scripts compartirá el volumen `/workspace/videos` con n8n.
+- El acceso SSH usará una clave dedicada y una cuenta restringida.
 
-### Nuevo servicio `ffmpeg-api`
+### Contenedor externo de scripts
 
 ```text
-n8n ──HTTP──> ffmpeg-api ──> ffmpeg/ffprobe
+n8n ──SSH──> scripts ──> ffmpeg/ffprobe
                   │
                   └── /workspace/videos compartido
 ```
 
-El servicio no publicará un puerto al host. n8n lo consumirá dentro de la red
-Docker mediante:
+El contenedor se conectará a la misma red externa y montará el mismo volumen:
 
 ```text
-http://ffmpeg-api:9100
+ix-internal-n8n-n8n-net
 ```
 
 El volumen compartido será:
@@ -1146,61 +1147,27 @@ networks:
 La red debe existir antes de desplegar el stack desde TrueNAS; el compose no
 intentará crearla.
 
-### API de trabajos
+### Ejecución de scripts
 
-El servicio tendrá una API HTTP asíncrona para que n8n no mantenga una petición
-abierta durante todo el procesamiento:
-
-```text
-POST /v1/jobs
-GET  /v1/jobs/{job_id}
-GET  /v1/jobs/{job_id}/result
-POST /v1/jobs/{job_id}/cancel
-GET  /health
-```
-
-Creación de trabajo:
-
-```json
-{
-  "operation": "export_reel",
-  "input_path": "/workspace/videos/work/video/video.mp4",
-  "output_path": "/workspace/videos/work/video/out/final.mp4",
-  "options": {
-    "video_codec": "libx264",
-    "audio_codec": "aac",
-    "video_bitrate": "6M",
-    "audio_bitrate": "256k"
-  }
-}
-```
-
-Respuesta:
-
-```json
-{
-  "job_id": "01J...",
-  "status": "queued"
-}
-```
-
-Estados soportados:
+Los scripts deben aceptar argumentos controlados y escribir estado, logs y
+salidas dentro del directorio de trabajo. Ejemplos de operaciones:
 
 ```text
-queued
-running
-completed
-failed
-cancelled
+probe
+prepare_video
+extract_audio
+mix_audio
+export_reel
 ```
 
-El progreso se obtendrá de la salida máquina de FFmpeg mediante `-progress`,
-incluyendo `out_time_ms`, `speed` y `progress=end`.
+Cada script debe devolver un código de salida no cero ante errores. Para tareas
+largas, debe escribir `status.json` y `progress.log`; n8n puede consultar esos
+archivos o esperar el comando SSH según la operación.
 
 ### Operaciones iniciales
 
-La API no aceptará comandos FFmpeg arbitrarios. Usará operaciones con argumentos
-controlados:
+El contenedor no aceptará comandos FFmpeg arbitrarios. Usará operaciones con
+argumentos controlados:
 
 - `probe`: inspeccionar duración, resolución y streams con `ffprobe`.
 - `prepare_video`: crear el máster a 30 fps y extraer el audio.
@@ -1226,39 +1193,42 @@ El resultado final mantendrá la ruta usada actualmente por el pipeline:
 /workspace/videos/work/<video-name>/out/final.mp4
 ```
 
-### Flujo nuevo de n8n
+### Flujo de n8n
 
 El workflow se reconstruirá desde cero con este flujo:
 
 ```text
 [Webhook]
   → [Inicializar trabajo]
-  → [POST ffmpeg-api: prepare_video]
+  → [SSH scripts: prepare_video]
   → [POST whisper-api]
   → [Guardar transcript y captions]
-  → [POST ffmpeg-api: probe/medición]
+  → [SSH scripts: probe/medición]
   → [Pausa de revisión humana]
   → [POST remotion: crear render]
   → [Polling Remotion]
   → [Pausa de QA]
-  → [POST ffmpeg-api: mix_audio/export_reel]
+  → [SSH scripts: mix_audio/export_reel]
   → [Respuesta final]
 ```
 
-Las llamadas que hoy ejecutan FFmpeg directamente dentro de n8n se migrarán al
-servicio nuevo una por una. Esto permite validar cada etapa sin cambiar la
-imagen actual de n8n.
+Las llamadas que hoy ejecutan FFmpeg directamente dentro de n8n se migrarán a
+scripts SSH una por una. Esto permite validar cada etapa sin cambiar la imagen
+actual de n8n.
 
-### Archivos previstos en el proyecto
+### Archivos del repositorio externo
 
 ```text
-ffmpeg-api/
+scripts-container/
 ├── Dockerfile
-├── requirements.txt
-└── app/
-    ├── main.py
-    ├── jobs.py
-    └── operations.py
+├── scripts/
+│   ├── probe.sh
+│   ├── prepare_video.sh
+│   ├── extract_audio.sh
+│   ├── mix_audio.sh
+│   └── export_reel.sh
+└── ssh/
+    └── authorized_keys
 
 docker-compose.yaml
 docker-compose.truenas.yaml
@@ -1271,12 +1241,12 @@ modificaciones.
 
 ### Orden de implementación
 
-1. Crear la imagen CPU de `ffmpeg-api` con FastAPI, FFmpeg y FFprobe.
-2. Implementar healthcheck, validación de rutas y creación de trabajos.
-3. Implementar polling, progreso, cancelación y limpieza de trabajos.
-4. Añadir las operaciones FFmpeg controladas.
-5. Crear el compose completo conectado a `ix-internal-n8n-n8n-net`.
-6. Crear el workflow n8n desde cero usando Whisper, Remotion y `ffmpeg-api`.
+1. Crear la imagen CPU del contenedor de scripts con FFmpeg y FFprobe.
+2. Configurar SSH restringido y autenticación por clave.
+3. Montar el volumen compartido en n8n y en el contenedor de scripts.
+4. Añadir validación de rutas y operaciones FFmpeg controladas.
+5. Conectar el contenedor a `ix-internal-n8n-n8n-net`.
+6. Crear el workflow n8n usando SSH, Whisper y Remotion.
 7. Probar con un vídeo real del volumen compartido.
 8. Documentar el procedimiento exacto para desplegar y actualizar desde TrueNAS.
 

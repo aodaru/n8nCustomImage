@@ -45,10 +45,11 @@ verificable y completarse antes de iniciar la siguiente.
 - [ ] Verificar captions, privacidad, audio y formato vertical.
 - [ ] Documentar recuperación tras reiniciar un contenedor.
 
-## Fase 7: Integración del servicio FFmpeg externo
+## Fase 7: Integración del contenedor de scripts por SSH
 
-- [ ] Implementar `ffmpeg-api` en el repositorio externo del contenedor de
+- [ ] Implementar el contenedor de scripts en el repositorio externo.
+- [ ] Añadir SSH restringido y autenticación por clave.
+- [ ] Montar `/mnt/Aodnas/Docker/videos` como `/workspace/videos` en n8n y
   scripts.
-- [ ] Conectar ese servicio a `ix-internal-n8n-n8n-net` y al volumen compartido.
-- [ ] Validar su contrato HTTP desde n8n.
+- [ ] Ejecutar scripts controlados desde n8n mediante SSH.
 - [ ] Migrar operaciones FFmpeg desde n8n una por una.
