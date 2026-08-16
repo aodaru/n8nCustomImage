@@ -31,39 +31,6 @@ services:
     networks:
       - n8n-net
 
-  postgres:
-    image: postgres:17.10-bookworm
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:?POSTGRES_USER is required}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      - POSTGRES_DB=${POSTGRES_DB:?POSTGRES_DB is required}
-    volumes:
-      - /mnt/Aodnas/Docker/N8N/db/17/docker:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U n8n"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - n8n-net
-
-  redis:
-    image: valkey/valkey:9.1.1
-    restart: unless-stopped
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD:?REDIS_PASSWORD is required}
-    command: valkey-server --appendonly yes --requirepass ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
-    volumes:
-      - /mnt/.ix-apps/docker/volumes/ix-n8n_redis-data/_data:/data
-    healthcheck:
-      test: ["CMD-SHELL", "valkey-cli -a \"$${REDIS_PASSWORD}\" ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    networks:
-      - n8n-net
-
 networks:
   n8n-net:
     external: true

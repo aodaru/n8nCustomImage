@@ -38,21 +38,18 @@ Pipeline completo de edición de video: n8n como orquestador, ffmpeg para transc
 │  │         /workspace/videos (volumen compartido)    │   │
 │  └───────────────────────────────────────────────────┘   │
 │                                                            │
-│  ┌──────────┐  ┌──────────┐                                │
-│  │ postgres │  │  redis   │                                │
-│  └──────────┘  └──────────┘                                │
 └──────────────────────────────────────────────────────────┘
 ```
 
-**4 contenedores gestionados por este Compose:**
+**2 contenedores gestionados manualmente desde la GUI de TrueNAS:**
 - **whisper-api** — faster-whisper, CPU, medium model, FastAPI API (transcripción)
 - **Remotion** — Node.js 20, Chromium, Express API (renderizado de overlays)
-- **postgres** — base de datos n8n
-- **redis** — caché/bull board n8n
 
 El contenedor n8n ya existe y no se crea en este proyecto. Los servicios de este
-Compose se conectan a la red externa `ix-internal-n8n-n8n-net` para que n8n los
-consuma por sus nombres internos.
+Compose se instalan manualmente desde la GUI de TrueNAS y se conectan a la red
+externa `ix-internal-n8n-n8n-net` para que n8n los consuma por sus nombres internos.
+PostgreSQL y Redis/Valkey pertenecen al despliegue existente de n8n y quedan
+fuera de este proyecto.
 
 **Comunicación n8n → whisper-api:** HTTP API interna (n8n llama a `http://whisper-api:9000/`)
 **Comunicación n8n → Remotion:** HTTP API interna (n8n llama a `http://remotion:3000/api/render`)
@@ -400,12 +397,11 @@ docker build -t whisper-cpu:latest /mnt/Aodnas/Docker/whisper-cpu/
 
 ## Fase 5: docker-compose.yaml
 
-El archivo `docker-compose.yaml` de este repositorio despliega únicamente los
-servicios auxiliares. El n8n existente se administra fuera de este Compose y
-debe estar conectado a la red externa `ix-internal-n8n-n8n-net`.
+El archivo `docker-compose.yaml` de este repositorio despliega únicamente
+`remotion` y `whisper-api`. El n8n existente, PostgreSQL y Redis/Valkey se
+administran fuera de este Compose.
 
-Antes de instalarlo desde TrueNAS, copiar `.env.example` a `.env` y completar
-las credenciales que ya usa la instalación existente. El servicio no publica
+Antes de instalarlo desde TrueNAS, copiar `.env.example` a `.env`. El servicio no publica
 puertos al host: n8n consume internamente `whisper-api:9000` y
 `remotion:3000`.
 
@@ -449,20 +445,6 @@ docker exec ix-n8n-aod-n8n-1 curl -s http://whisper-api:9000/health
 
 ```bash
 docker exec ix-n8n-aod-n8n-1 curl -s http://remotion:3000/health
-```
-
-### PostgreSQL
-
-```bash
-docker exec ix-n8n-aod-postgres-1 pg_isready
-# → /var/run/postgresql:5432 - accepting connections
-```
-
-### Redis
-
-```bash
-docker exec ix-n8n-aod-redis-1 valkey-cli -a "$REDIS_PASSWORD" ping
-# → PONG
 ```
 
 ### ffmpeg (CPU)

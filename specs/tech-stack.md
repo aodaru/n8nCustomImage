@@ -22,7 +22,8 @@
 - `ffmpeg-api`: FastAPI/Uvicorn, FFmpeg y FFprobe, con jobs CPU.
 - `whisper-api`: FastAPI con `faster-whisper`, modelo `medium`, CPU.
 - `remotion`: Node.js, Chromium y Remotion para composicion visual.
-- PostgreSQL y Valkey/Redis permanecen como servicios de n8n.
+- PostgreSQL y Valkey/Redis pertenecen al despliegue existente de n8n y no son
+  administrados por este proyecto.
 
 ## Contratos y almacenamiento
 
@@ -40,8 +41,8 @@
 - El flujo anterior ejecuta FFmpeg directamente dentro de n8n.
 - No hay una implementacion persistente y aislada de cola, progreso,
   cancelacion y limpieza de jobs FFmpeg.
-- La instalacion real se administra desde TrueNAS, pero el compose completo
-  debe quedar versionado en este repositorio.
+- Los contenedores de herramientas se despliegan manualmente desde la GUI de
+  TrueNAS y este compose queda versionado como referencia.
 
 ## Restricciones
 
