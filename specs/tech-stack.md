@@ -21,8 +21,8 @@
   por palabra.
 - `remotion`: Node.js, Chromium, Express y Remotion para captions, overlays y
   composición visual.
-- `ffmpeg-api`: servicio futuro para extraer progresivamente FFmpeg de n8n;
-  se implementará después de validar Whisper y Remotion.
+- `ffmpeg-api`: servicio externo, implementado y desplegado desde el repositorio
+  del contenedor de scripts. Este repositorio solo consumirá su contrato HTTP.
 
 ## Contratos y almacenamiento
 
@@ -41,7 +41,8 @@
 - Persistir transcript, captions, estados y rutas de cada trabajo.
 - Implementar pausas de revisión humana y QA.
 - Validar el pipeline completo con un Reel real en CPU.
-- Extraer posteriormente las operaciones FFmpeg a `ffmpeg-api`.
+- Integrar el `ffmpeg-api` del repositorio externo después de validar Whisper y
+  Remotion.
 
 ## Restricciones
 

@@ -45,9 +45,10 @@ verificable y completarse antes de iniciar la siguiente.
 - [ ] Verificar captions, privacidad, audio y formato vertical.
 - [ ] Documentar recuperación tras reiniciar un contenedor.
 
-## Fase 7: FFmpeg como servicio posterior
+## Fase 7: Integración del servicio FFmpeg externo
 
-- [ ] Definir contrato de `ffmpeg-api`.
-- [ ] Crear imagen CPU con FFmpeg y FFprobe.
-- [ ] Implementar jobs, progreso, cancelación y rutas seguras.
+- [ ] Implementar `ffmpeg-api` en el repositorio externo del contenedor de
+  scripts.
+- [ ] Conectar ese servicio a `ix-internal-n8n-n8n-net` y al volumen compartido.
+- [ ] Validar su contrato HTTP desde n8n.
 - [ ] Migrar operaciones FFmpeg desde n8n una por una.

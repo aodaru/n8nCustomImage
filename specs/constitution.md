@@ -21,8 +21,8 @@ orquestar para editar videos.
 - n8n orquesta el workflow y conserva su responsabilidad de integracion.
 - `whisper-api` proporciona transcripcion local con timestamps por palabra.
 - `remotion` proporciona composicion visual, captions, overlays y render.
-- `ffmpeg-api` es una etapa futura de extraccion de procesamiento; no es un
-  prerrequisito para integrar primero Whisper y Remotion.
+- `ffmpeg-api` será responsabilidad del repositorio externo del contenedor de
+  scripts; no se implementará ni desplegará aquí.
 - n8n, PostgreSQL y Redis/Valkey ya existen y quedan fuera de este repositorio.
   Este proyecto no los crea, modifica ni administra.
 

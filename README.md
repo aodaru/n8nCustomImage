@@ -10,8 +10,8 @@ Whisper API; n8n, PostgreSQL y Redis/Valkey ya existen fuera del proyecto.
 - Flujo: transcripción, captions, composición visual, revisión humana y QA.
 - Despliegue: manual desde la GUI de TrueNAS.
 - Integración: red externa `ix-internal-n8n-n8n-net` y volumen compartido.
-- Prioridad actual: integrar Whisper y Remotion antes de extraer FFmpeg a un
-  servicio independiente.
+- Prioridad actual: integrar Whisper y Remotion. `ffmpeg-api` se implementará en
+  el repositorio externo del contenedor de scripts y luego se consumirá por HTTP.
 
 ## Contexto
 
