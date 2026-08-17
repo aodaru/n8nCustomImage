@@ -9,7 +9,7 @@ Whisper API; n8n, PostgreSQL y Redis/Valkey ya existen fuera del proyecto.
 - Usuario objetivo: editor individual que trabaja principalmente en español.
 - Flujo: transcripción, captions, composición visual, revisión humana y QA.
 - Despliegue: manual desde la GUI de TrueNAS.
-- Integración: red externa `ix-internal-n8n-n8n-net` y volumen compartido.
+- Integración: red externa fija `ix-internal-n8n-n8n-net` y volumen compartido.
 - Prioridad actual: integrar Whisper y Remotion. FFmpeg se ejecutará por SSH en
   un contenedor externo de scripts que comparte el volumen de videos con n8n.
 
@@ -1140,7 +1140,7 @@ La declaración prevista para el compose es:
 ```yaml
 networks:
   n8n-net:
-    external: true
+    external: True
     name: ix-internal-n8n-n8n-net
 ```
 
